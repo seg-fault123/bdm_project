@@ -14,7 +14,7 @@ def plot_hist_box(data, feature):
     return axes
 
 
-def plot_hist_default_pct(feature, dataframe, bins):
+def plot_hist_default_pct(feature, dataframe, bins, ax=None, print_bins=True):
     '''
     takes a dataframe, a feature name and number of bins. Plots a histogram of the feature such that binning is equal width, and the value is the deafult percentage of that bin.  
     '''
@@ -24,14 +24,25 @@ def plot_hist_default_pct(feature, dataframe, bins):
     default_counts=df.loc[df['TARGET']==1, '%s_binned'%feature].value_counts()
     default_counts=default_counts*100/counts
     default_counts.sort_index(inplace=True)
-    ax=plt.axes()
+    if ax is None:
+        ax=plt.axes()
     ax.bar(default_counts.index.astype(str), default_counts.values)
     ax.tick_params(axis='x', rotation=90)
     ax.set_title('Deafulters %% in %s'%feature)
     ax.set_xlabel('Category')
     ax.set_ylabel('Defaulter %')
-    print(default_counts)
+    if print_bins==True:
+        print(default_counts)
 
+
+def plot_all_hist_default_pct(dataframe, numerical_features):
+    '''
+    takes a dataframe and features, plots the hist_default plots of all features present in numerical_features 
+    '''
+    fig, axes=plt.subplots(numerical_features.shape[0])
+    fig.set_size_inches(10, 6*numerical_features.shape[0])
+    for i, feature in enumerate(numerical_features):
+        plot_hist_default_pct(feature, dataframe, 9, ax=axes[i], print_bins=False)
 
 
 def calc_iqr(feature, data):
