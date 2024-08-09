@@ -1,6 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 def plot_hist_box(data, feature):
     '''
@@ -97,3 +98,39 @@ def median_vs_target(feature, data):
     '''
     print('Median of %s with target=0 : %f'%(feature, data.loc[data['TARGET']==0, feature].median()))
     print('Median of %s with target=1 : %f'%(feature, data.loc[data['TARGET']==1, feature].median()))
+
+
+
+def plot_category_vs_target_bar(feature, dataframe, ax=None):
+    df=dataframe.copy()
+    counts=df[feature].value_counts(dropna=False)
+    default_counts=df.loc[df['TARGET']==1, feature].value_counts(dropna=False)
+    default_counts=default_counts*100/counts
+    default_counts.replace({np.nan: 0}, inplace=True)
+    default_counts.sort_values(inplace=True)
+    if ax is None:
+        ax=plt.axes()
+        print(default_counts)
+    ax.bar(default_counts.index.astype(str), default_counts.values)
+    ax.tick_params(axis='x', rotation=90)
+    ax.set_title('Deafulters %% in %s'%feature)
+    ax.set_xlabel('Category')
+    ax.set_ylabel('Defaulter %')
+    return ax
+
+
+def plot_all_encoded_vs_target(dataframe:pd.DataFrame):
+    features=dataframe.columns.difference(['SK_ID_CURR', 'TARGET'])
+    fig, axes=plt.subplots(nrows=features.shape[0], ncols=2)
+    fig.set_size_inches(w=10, h=9*features.shape[0])
+    total=dataframe.shape[0]
+    for i, feature in enumerate(features):
+        plot_data=dataframe[feature].value_counts(dropna=False)*100/total
+        plot_data.rename(index={0: "No", 1: "Yes"}, inplace=True)
+        axes[i, 0].pie(x=plot_data.values, labels=plot_data.index, autopct='%1.3f%%')
+        axes[i, 0].set_title('Distribution of %s'%feature)
+        plot_category_vs_target_bar(feature, dataframe, axes[i, 1])
+        if axes[i, 1].get_xticklabels()[0].get_text()==plt.text(0, 0, '0').get_text():
+            axes[i, 1].set_xticks(axes[i, 1].get_xticks(), labels=['No', 'Yes'])
+        else:
+            axes[i, 1].set_xticks(axes[i, 1].get_xticks(), labels=['Yes', 'No'])
