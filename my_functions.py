@@ -27,8 +27,8 @@ def plot_hist_default_pct(feature, dataframe, bins, ax=None, print_bins=True):
     default_counts.sort_index(inplace=True)
     if ax is None:
         ax=plt.axes()
-    ax.bar(default_counts.index.astype(str), default_counts.values)
-    ax.tick_params(axis='x', rotation=90)
+    labels=[str(x.left.round(3)) for x in default_counts.index]
+    ax.bar(labels, default_counts.values, width=1, align='edge')
     ax.set_title('Deafulters %% in %s'%feature)
     ax.set_xlabel('Category')
     ax.set_ylabel('Defaulter %')
